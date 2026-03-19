@@ -492,7 +492,7 @@ function renderTasks() {
     container.innerHTML=`<div class="empty"><div class="e-icon">${m.icon}</div><h3>${m.title}</h3><p>${m.sub}</p></div>`;
     return;
   }
-  const sorted=[...tasks].sort((a,b)=>{if(a.done!==b.done)return a.done?1:-1;return priOrder[a.priority]-priOrder[b.priority];});
+  const sorted=[...tasks].sort((a,b)=>{if(a.done!==b.done)return a.done?1:-1;if(!a.done&&!b.done)return priOrder[a.priority]-priOrder[b.priority];return(a.completedAt||0)-(b.completedAt||0);});
   container.innerHTML='';
   sorted.forEach(task=>{
     const el=document.createElement('div');
@@ -564,7 +564,11 @@ function addTask(text){
 function toggle(id){
   const tasks=tasksFor(selectedKey);
   const t=tasks.find(t=>t.id===id);
-  if(t){t.done=!t.done;saveAndSync(selectedKey,tasks);render();}
+  if(t){
+    t.done=!t.done;
+    t.completedAt=t.done?Date.now():null;
+    saveAndSync(selectedKey,tasks);render();
+  }
 }
 function remove(id){
   const tasks=tasksFor(selectedKey).filter(t=>t.id!==id);
